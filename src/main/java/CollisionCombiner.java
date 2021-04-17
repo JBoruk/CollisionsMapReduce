@@ -1,22 +1,21 @@
 import java.io.IOException;
 
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
-public class CollisionCombiner extends Reducer<StreetWritable, Text, StreetWritable, Text> {
+public class CollisionCombiner extends Reducer<KeyWritable, LongWritable, KeyWritable, LongWritable> {
 
 	@Override
-	public void reduce(StreetWritable key, Iterable<Text> values, Context context)
+	public void reduce(KeyWritable key, Iterable<LongWritable> values, Context context)
 			throws IOException, InterruptedException {
 		
+		Long sum = 0L;
 		
-		for (Text val : values) {
+		for (LongWritable val : values) {
 			sum += val.get();
-			count += 1;
 		}
-		average = sum / count;
-		result.set(average);
-		context.write(sumText, result);
+		
+		context.write(key, new LongWritable(sum));
 	}
 
 }
