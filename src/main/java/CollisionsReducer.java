@@ -5,25 +5,21 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-public class CollisionsReducer extends Reducer<KeyWritable, LongWritable, Text, LongWritable> {
+public class CollisionsReducer extends Reducer<Text, LongWritable, Text, LongWritable> {
 	
-	private static final Logger logger = Logger.getLogger(CollisionsReducer.class.getName());
-	  
+	private LongWritable finalSum = new LongWritable();
+	Long sum;
+	
 	@Override
-	public void reduce(KeyWritable key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException {
+	public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException {
+		sum = 0L;
 
-		Text text = new Text(String.format("ZipCode: %s, StreetName: %s, Victim: %s, Injury: %s", 
-				key.getZipCode(), key.getStreetName(), key.getTypeOfVictim(), key.getNatureOfInjury()));
-
-		Long sum = 0L;
-		
-		for (LongWritable val : values) {
-			sum += val.get();
-		}
-		
-		logger.info("REDUCER. Summed: " + sum + ". Key: " + key.getTypeOfVictim() + "-" + key.getNatureOfInjury());
-		
-		context.write(text, new LongWritable(sum));
+        for (LongWritable val : values) {
+            sum += val.get();
+        }
+        
+        finalSum.set(sum);
+        context.write(key, finalSum);
 	}
 
 }
